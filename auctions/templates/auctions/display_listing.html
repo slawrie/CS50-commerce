@@ -1,0 +1,50 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2> {{ auction.title }}</h2>
+
+    <p> {{ auction.description }}</p>
+
+    <div>
+
+    {% if user.is_authenticated%}
+        <form action="{% url 'watch' listing_pk=auction.id %}" method="POST">
+        {% csrf_token %}
+            {% if on_watch %}
+                <input type="submit" class="w3-button w3-round-xlarge" value="Remove from watchlist" name="watch">
+            {% else %}
+                <input type="submit" class="w3-button w3-round-xlarge" value="Add to watchlist" name="watch">
+            {% endif %}
+        </form>
+    {% endif %}
+
+
+    {% if auction.active %}
+
+        {% if user.is_authenticated and is_seller %}
+            <form action="{% url 'close_listing' listing_pk=auction.id %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" class="w3-button w3-round-xlarge" value="Close auction" name="close_listing">
+            </form>
+
+        {%  elif user.is_authenticated and not is_seller %}
+            <form action="{% url 'place_bid' listing_pk=auction.id %}" method="POST">
+            {% csrf_token %}
+            {{ bid_form }}
+            <input type="submit" class="w3-button w3-round-xlarge" value="Place bid" name="place_bid">
+            </form>
+
+        {% endif %}
+
+    {% else%}
+        {% if user.is_authenticated and is_winner %}
+            <p> You have won this auction. </p>
+        {% else %}
+            <p> Auction closed.</p>
+        {% endif %}
+    {% endif %}
+
+
+    </div>
+
+{% endblock %}
