@@ -4,8 +4,7 @@
     <h2>Categories</h2>
         <ul>
         {% for category in categories %}
-            <li> <a class="nav-link" href="{% url 'listing' auction.id %}">{{auction.title}} </a>: {{auction.current_price}} US$ </li>
-
+            <li> <a class="nav-link" href="{% url 'category' category %}">{{category}} </a></li>
         {%  endfor %}
         </ul>
 {% endblock %}

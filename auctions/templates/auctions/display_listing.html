@@ -44,7 +44,21 @@
         {% endif %}
     {% endif %}
 
+    {% if user.is_authenticated %}
+        <form action="{% url 'place_comment' listing_pk=auction.id %}" method="POST">
+            {% csrf_token %}
+            {{ comment_form }}
+            <input type="submit" class="w3-button w3-round-xlarge" value="Comment" name="place_comment">
+            </form>
+    {%  endif %}
 
+    {% if comments %}
+        {% for comment in comments %}
+            <ul>
+            On {{ comment.date }}, {{ comment.user }} thought: {{ comment.comment }}
+            </ul>
+        {% endfor %}
+    {%  endif %}
     </div>
 
 {% endblock %}

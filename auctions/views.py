@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .forms import AuctionForm, BidForm
+from .forms import AuctionForm, BidForm, CommentForm
 from .models import User, Auction, Watchlist, Bid, Comment
 
 
@@ -111,19 +111,45 @@ def display_listing(request, listing_pk):
         is_winner = False
 
     bid_form = BidForm()
+
+    # handle comments
+    comments = Comment.objects.filter(auction=listing_pk)
+
+    comment_form = CommentForm()
+
     return render(request, "auctions/display_listing.html", {
             "auction": auction,
             "is_seller": is_seller,
             "on_watch": on_watch,
             "is_winner": is_winner,
             "bid_form": bid_form,
+            "comments": comments,
+            "comment_form": comment_form
     })
 
 
 def categories(request):
     # display all categories, link redirects to active listings in the category
-    #categories = Auction.objects.get.category_choices
-    pass
+    categories = [c[1] for c in Auction.category.field.choices]
+    categories.sort()
+    return render(request, 'auctions/categories.html', {
+        'categories': categories
+    })
+
+
+def category(request, category):
+    # display listings in that category
+    # Filter auctions
+
+    if category == 'Unspecified':
+        auctions = Auction.objects.filter(category='', active=True)
+    else:
+        auctions = Auction.objects.filter(category=category.lower(), active=True)
+    return render(request, 'auctions/category.html', {
+        'category': category,
+        'auctions': auctions
+    })
+
 
 @login_required(login_url="login")
 def add_listing(request):
@@ -199,6 +225,26 @@ def place_bid(request, listing_pk):
                 return HttpResponse("Error -- increase the amount of your bid.")
 
 
+
+@login_required(login_url="login")
+def place_comment(request, listing_pk):
+
+    if request.method == 'POST':
+        # get data from form
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.cleaned_data["comment"]
+            auction = Auction.objects.get(pk=listing_pk)
+
+           # save comment
+            new_comment = Comment(user=request.user,
+                                  auction=auction,
+                                  comment=comment)
+            new_comment.save()
+
+            return display_listing(request, listing_pk) # should display updated comments
+
+
 @login_required(login_url="login")
 # to be finished, button doesn't work to close auction
 def close_listing(request, listing_pk):
@@ -252,6 +298,3 @@ def watchlist(request):
     return render(request, 'auctions/watchlist.html', {
                     'watchlist_items': watchlist_items
         })
-
-
-

@@ -1,0 +1,11 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2> {{ category }} Listings </h2>
+        <ul>
+        {% for auction in auctions %}
+            <li> <a class="nav-link" href="{% url 'listing' auction.id %}">{{auction.title}} </a>: {{auction.current_price}} US$ </li>
+
+        {%  endfor %}
+        </ul>
+{% endblock %}

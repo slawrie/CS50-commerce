@@ -14,7 +14,7 @@ class Auction(models.Model):
     description = models.TextField(max_length=300, blank=True)
     initial_price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     current_price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    category_choices = [('', ''), ('toys', 'Toys'), ('fashion', 'Fashion'),
+    category_choices = [('', 'Unspecified'), ('toys', 'Toys'), ('fashion', 'Fashion'),
                         ('electronics', 'Electronics'), ('books', 'Books'),
                         ('sports', 'Sports'), ('home', 'Home'), ('music', 'Music')]
 
@@ -23,8 +23,8 @@ class Auction(models.Model):
     active = models.BooleanField(default=True)  # bids still allowed if True
     winner = models.ForeignKey(User, models.SET_NULL, blank=True, null=True, related_name='winner')
 
-class Watchlist(models.Model):
 
+class Watchlist(models.Model):
     # Each item is associated to an item and a user
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='watchlist')
@@ -38,4 +38,8 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    pass
+    # Each item is associated to a user and an auction
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, default="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment', default="")
+    date = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField(max_length=300, default="")
